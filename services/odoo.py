@@ -1,8 +1,7 @@
 import xmlrpc.client
 
 ODOO_URL = "http://localhost:8069"
-ODOO_DB = "odoo18_db"  # change if needed
-
+ODOO_DB = "your_db_name"
 
 def get_odoo_connection(username: str, password: str):
     try:
@@ -17,5 +16,5 @@ def get_odoo_connection(username: str, password: str):
         return uid, models
 
     except Exception as e:
-        print(f"Odoo connection error: {e}")
+        print("Odoo connection error:", e)
         return None, None
