@@ -1,7 +1,8 @@
 import xmlrpc.client
 
 ODOO_URL = "http://localhost:8069"
-ODOO_DB = "your_db_name"
+ODOO_DB = "odoo18_db"
+
 
 def get_odoo_connection(username: str, password: str):
     try:
@@ -12,7 +13,6 @@ def get_odoo_connection(username: str, password: str):
             return None, None
 
         models = xmlrpc.client.ServerProxy(f"{ODOO_URL}/xmlrpc/2/object")
-
         return uid, models
 
     except Exception as e:
