@@ -62,6 +62,7 @@ odoo_ia_backend/
 ├── README.md               # Project documentation
 ├── routes/                 # API endpoint definitions by domain
 │   ├── __init__.py
+│   ├── ai.py               # AI Chat and report generation endpoints
 │   ├── auth.py             # Login and authentication endpoints
 │   ├── companies.py        # Company data endpoints
 │   ├── crm.py              # Leads and opportunities endpoints
@@ -70,7 +71,8 @@ odoo_ia_backend/
 │   ├── invoices.py         # Financial invoice endpoints
 │   ├── purchases.py        # Purchase order endpoints
 │   ├── sales.py            # Sales order endpoints
-│   └── suppliers.py        # Supplier management endpoints
+│   ├── suppliers.py        # Supplier management endpoints
+│   └── users.py            # User preferences endpoints (Theme mode)
 ├── services/               # Core business logic and integrations
 │   ├── __init__.py
 │   ├── ai.py               # Future AI integrations and capabilities
@@ -147,46 +149,60 @@ The backend employs a hybrid authentication strategy combining Odoo's native aut
 
 ## API Reference
 
-All routes (except login) require a valid JWT Bearer token in the `Authorization` header.
+All routes (except login and health) require a valid JWT Bearer token in the `Authorization` header.
+
+### System & Health
+- **`GET /health`**
+  - **Description:** Lightweight endpoint to verify that the backend API is up and running.
 
 ### Authentication
 - **`POST /api/auth/login`**
   - **Payload:** `{"username": "user@example.com", "password": "password123"}`
   - **Response:** Returns the JWT access token and token type.
 
+### Users (Preferences)
+- **`GET /api/user/preferences`**
+  - **Description:** Retrieves the logged-in user's custom preferences (e.g., UI Theme) directly from the Odoo `res.users` model.
+- **`PUT /api/user/preferences`**
+  - **Description:** Updates the user's preferences in the Odoo database (requires custom Odoo module for new fields).
+
+### AI Integrations
+- **`POST /api/ai/chat`**
+  - **Description:** Interactive endpoint to process natural language queries through an LLM.
+- **`POST /api/ai/generate-report`**
+  - **Description:** Generates structured, AI-driven summaries and reports based on selected parameters.
+
 ### CRM (Customer Relationship Management)
-- **`GET /api/crm/`**
-  - **Description:** Retrieves a list of active CRM leads and opportunities.
-  - **Returns:** JSON object containing an array of lead records.
-- **`POST /api/crm/`**
-  - **Description:** Creates a new CRM lead.
-  - **Payload Example:** `{"name": "New Opportunity", "expected_revenue": 50000.0, "partner_id": 12}`
+- **`GET /api/crm/`**: Retrieves a list of active CRM leads and opportunities.
+- **`POST /api/crm/`**: Creates a new CRM lead.
+- **`PUT /api/crm/{id}` / `DELETE /api/crm/{id}`**: Updates or removes existing leads.
 
 ### Sales
-- **`GET /api/sales/`**
-  - **Description:** Fetches current sales orders and quotations.
+- **`GET /api/sales/`**: Fetches current sales orders and quotations.
+- **`POST /api/sales/`**: Creates a new sale order.
+- **`PUT /api/sales/{id}` / `DELETE /api/sales/{id}`**: Updates or removes existing orders.
 
 ### Purchases
-- **`GET /api/purchases/`**
-  - **Description:** Fetches active purchase orders and vendor bills.
+- **`GET /api/purchases/`**: Fetches active purchase orders and vendor bills.
+- **`POST /api/purchases/`**: Creates a new purchase order.
+- **`PUT /api/purchases/{id}` / `DELETE /api/purchases/{id}`**: Updates or removes existing purchase orders.
 
 ### Invoices
-- **`GET /api/invoices/`**
-  - **Description:** Retrieves financial invoices and their payment statuses.
+- **`GET /api/invoices/`**: Retrieves financial invoices and their payment statuses.
+- **`POST /api/invoices/{id}/pay`**: Initiates a payment process for a specific invoice.
 
 ### Customers & Suppliers
-- **`GET /api/customers/`**
-  - **Description:** Retrieves a list of partners classified as customers.
-- **`GET /api/suppliers/`**
-  - **Description:** Retrieves a list of partners classified as suppliers/vendors.
+- **`GET /api/customers/` / `POST /api/customers/`**: Retrieves or creates customer partners.
+- **`GET /api/suppliers/` / `POST /api/suppliers/`**: Retrieves or creates vendor/supplier partners.
+- **`PUT /{id}` / `DELETE /{id}`**: Full update/delete capabilities implemented for both types.
 
 ### Companies
-- **`GET /api/companies/`**
-  - **Description:** Retrieves system company configuration and details.
+- **`GET /api/companies/` / `POST /api/companies/`**: Retrieves system company details or creates a new company.
+- **`PUT /api/companies/{id}` / `DELETE /api/companies/{id}`**: Updates or removes company records.
 
 ### Dashboard
 - **`GET /api/dashboard/`**
-  - **Description:** Aggregates KPIs and summary data from various modules to populate the frontend dashboard overview.
+  - **Description:** Aggregates real-time KPIs and summary data (totals, revenues, active counts) from various Odoo modules to populate the frontend dashboard overview.
 
 ---
 
