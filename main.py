@@ -11,7 +11,8 @@ from routes import (
     companies,
     dashboard,
     invoices,
-    ai
+    ai,
+    users
 )
 
 app = FastAPI(title="Odoo Backend")
@@ -34,6 +35,7 @@ app.include_router(companies.router, prefix="/api/companies")
 app.include_router(dashboard.router, prefix="/api/dashboard")
 app.include_router(invoices.router, prefix="/api/invoices")
 app.include_router(ai.router, prefix="/api/ai")
+app.include_router(users.router, prefix="/api/user")
 
 
 @app.get("/")
