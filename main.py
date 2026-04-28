@@ -10,7 +10,8 @@ from routes import (
     suppliers,
     companies,
     dashboard,
-    invoices
+    invoices,
+    ai
 )
 
 app = FastAPI(title="Odoo Backend")
@@ -32,8 +33,13 @@ app.include_router(suppliers.router, prefix="/api/suppliers")
 app.include_router(companies.router, prefix="/api/companies")
 app.include_router(dashboard.router, prefix="/api/dashboard")
 app.include_router(invoices.router, prefix="/api/invoices")
+app.include_router(ai.router, prefix="/api/ai")
 
 
 @app.get("/")
 def root():
     return {"message": "Backend running"}
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "message": "Healthy"}
