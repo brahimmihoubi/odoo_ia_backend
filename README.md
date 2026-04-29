@@ -162,9 +162,9 @@ All routes (except login and health) require a valid JWT Bearer token in the `Au
 
 ### Users (Preferences)
 - **`GET /api/user/preferences`**
-  - **Description:** Retrieves the logged-in user's custom preferences (e.g., UI Theme) directly from the Odoo `res.users` model.
+  - **Description:** Retrieves the logged-in user's custom preferences (e.g., UI Theme) instantly from the lightweight in-memory session.
 - **`PUT /api/user/preferences`**
-  - **Description:** Updates the user's preferences in the Odoo database (requires custom Odoo module for new fields).
+  - **Description:** Updates the user's active theme preference within the current server session.
 
 ### AI Integrations
 - **`POST /api/ai/chat`**
@@ -212,14 +212,14 @@ All routes (except login and health) require a valid JWT Bearer token in the `Au
 This module acts as the gatekeeper for protected routes. It exposes the `get_current_user` dependency which:
 1. Extracts and verifies the JWT from the request header.
 2. Retrieves the active session corresponding to the token.
-3. Re-establishes the Odoo XML-RPC object connection.
-4. Injects the connection details (`uid`, `models`, `password`) into the route handler.
+3. Rapidly re-establishes the Odoo XML-RPC object proxy (skipping the expensive `authenticate` call by reusing the cached `uid`).
+4. Injects the connection details (`username`, `uid`, `models`, `password`) into the route handler.
 
 ### `services/odoo.py`
-Manages the raw XML-RPC connection to Odoo. It handles the `common.authenticate` calls and provides access to the `object.execute_kw` wrapper needed to query Odoo models like `crm.lead` or `sale.order`.
+Manages the raw XML-RPC connection to Odoo. It handles the initial `common.authenticate` calls during login and provides access to the `object.execute_kw` wrapper needed to query Odoo models like `crm.lead` or `sale.order`.
 
 ### `services/session.py`
-A lightweight, dictionary-based in-memory state manager. It maps a `username` to their current active Odoo `uid` and connection parameters, ensuring that the API doesn't need to re-authenticate with Odoo's database on every single HTTP request.
+A lightweight, dictionary-based in-memory state manager. It maps a `username` to their current active Odoo `uid`, connection parameters, and UI preferences (like the active theme). This ensures the API doesn't need to re-authenticate with Odoo's database on every HTTP request, and keeps UI preference lookups instantaneous.
 
 ---
 
