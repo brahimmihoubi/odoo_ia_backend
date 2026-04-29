@@ -7,7 +7,7 @@ from services.odoo import get_odoo_connection
 def get_current_user(authorization: str = Header(...)):
     try:
         token = authorization.split(" ")[1]
-    except:
+    except Exception:
         raise HTTPException(status_code=401, detail="Invalid token format")
 
     payload = verify_token(token)
@@ -21,13 +21,17 @@ def get_current_user(authorization: str = Header(...)):
         raise HTTPException(status_code=401, detail="Session expired")
 
     password = session["password"]
+    uid = session["uid"]  # reuse uid from session, no re-auth needed
 
-    uid, models = get_odoo_connection(username, password)
-    if not uid:
-        raise HTTPException(status_code=401, detail="Odoo auth failed")
+    # models is an XML-RPC proxy, rebuild it per request
+    # but skip expensive authenticate() since uid is already known
+    _, models = get_odoo_connection(username, password)
+    if not models:
+        raise HTTPException(status_code=401, detail="Odoo connection failed")
 
     return {
+        "username": username,  # needed so routes can access session
         "uid": uid,
         "models": models,
-        "password": password
+        "password": password,
     }
